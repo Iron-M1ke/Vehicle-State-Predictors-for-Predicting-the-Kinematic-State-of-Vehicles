@@ -1,0 +1,754 @@
+{\rtf1\ansi\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset161 Calibri;}}
+{\colortbl ;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang10\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+Vehicle State Predictors for Predicting \par
+the Kinematic State of Vehicles\par
+\par
+\par
+\par
+\par
+Author: Oliver David Coates\par
+Student Number: 19004918\par
+Project Supervisor: Dr. Marco Profili, Dr. Viktor Doychinov\par
+Project Shadow: Prof. Fun Hu, Dr. Viktor Doychinov\par
+Course: MSc Satellite Systems Engineering\par
+\par
+\par
+\par
+\par
+\par
+\par
+Submitted in partial fulfilment of the requirements for the degree of \par
+MSc Satellite System Engineering\par
+From the\par
+University of Bradford\par
+Table of Contents\par
+Table of Contents\tab 2\par
+Table of Figures\tab 3\par
+Table of Graphs\tab 4\par
+0. Abstract\tab 5\par
+1. Introduction\tab 5\par
+1.0. Overview\tab 5\par
+1.1. Background\tab 5\par
+1.2. Project Aims\tab 7\par
+1.3. Project Plan\tab 7\par
+2. Literature Review\tab 8\par
+2.0. Methodology and Rationale\tab 8\par
+2.1. Similar Papers & Studies - A Literature Review\tab 9\par
+2.3. Evaluation of Methodology & The State of Research\tab 11\par
+3. Data Collection and Preprocessing\tab 12\par
+3.0. Data Collection\tab 12\par
+3.1. Preliminary Analysis of Collected Data\tab 13\par
+3.2. Vessel/Maritime Data Analysis\tab 22\par
+3.2.0. Data Background\tab 22\par
+3.2.1. Initial Data Analysis and Preprocessing\tab 23\par
+4. Vehicle State Predictors\tab 24\par
+4.0. The Usage of Vehicle State Predictors for Prediction Purposes\tab 24\par
+4.1. Methodology & Selection of Prediction Models\tab 25\par
+4.2. Implementing Prediction Models\tab 29\par
+4.3. Testing\tab 29\par
+4.4. Evaluation and Findings\tab 29\par
+5. Conclusion\tab 30\par
+5.0. Summarisation of Findings and Concluding Comments\tab 30\par
+5.1. Future Recommendations\tab 30\par
+6. Bibliography\tab 30\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+Table of Figures\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+Table of Graphs\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+0. Abstract\par
+TBA at END\par
+1. Introduction\par
+1.0. Overview\par
+This thesis aims to produce an answer to the following problem: \ldblquote Can we predict a vehicle\'b4s movement using satellite products?\rdblquote  That is the core question of this thesis. \par
+\par
+In order to get to the conclusion of this question (indeed, if there is one) we need to understand multiple aspects related to the question we are trying to answer: Why do we need to predict a vehicle\'b4s movement? How could this produce an overall positive benefit? What is the current state of research in vehicle state predictors? Do we employ a traditional statistical approach or use an ever increasingly popular AI/Machine Learning approach? Or even adopt a hybrid approach? What kind of vehicle data is required to conduct an accurate prediction? How does this research impact you or other people?\par
+\par
+These questions help pose an introduction, a mutual understanding and question to me and to you, the reader: why should we predict a vehicle\'b4s movement from satellite products and how do we get there? Current similar research into autonomous driving [2] [3] [6], land based vehicle detection from satellite image products [4] [7], naval studies on AIS data [5] and other papers researching trajectory prediction [9] [10] [16] suggests that the possibility of predicting vehicle (even human) trajectories based on parameters associated to the vehicle (e.g. velocity, longitude, latitude) is certainly a realistic possibility.\par
+\par
+Each aspect of research, no matter the subject, will almost certainly have pitfalls, challenges, no definitive answers, or numerous other setbacks, the thesis must be resilient when encountering any setback. In terms of this paper, some of the challenges I anticipate this thesis will encounter, due to its nature, are:\par
+Data gathering and processing - collecting relevant data from vehicles may be time-consuming to collect and may be irrelevant or challenging to procure from other external sources.\par
+Data pre-processing - data taken from external sources may require pre-processing in order to be compatible or even usable with later prediction models.\par
+Model implementation and optimisation.\par
+\par
+To begin, understanding the background of the question would be a good place to start in the formulation of this thesis.\par
+1.1. Background\par
+Using satellite products primarily for vehicle state prediction is nothing new in terms of research, however, purely using satellite imagery products for the purposes of vehicle state prediction is an under-researched field, with the most viewed papers on ResearchGate, Google Scholar, IEEE Explore and many other related research websites and publishers relating vehicle state prediction and it\rquote s related research/papers/journals to autonomous vehicles [2][3], a key research area in the field of vehicle state prediction. Satellite products in many papers, as well as those papers covered in this thesis, are used as a complement or addition to existing data from things such as AIS, IMU and ego-vehicle sensor data for both land and sea based vehicles.\par
+\par
+However, most products utilising vehicle state prediction in autonomous vehicles [3] and AIS-utilising maritime vessels (i.e. maritime vehicles such as boats and ships over 300 tonnes) [4] will utilise satellite products in their operations (e.g. navigational information from GNSS) in conjunction with other navigational parameters. Meaning we could also use them for our own prediction purposes, as well as taking into account other information a vehicle may transmit. \par
+\par
+In terms of why we would potentially want to utilise satellite images for vehicle state prediction purposes, a number of scenarios and problems could be solved by answering the original question (or parts of the original question) of this thesis. \par
+\par
+For example, we might have a busy trade route that is used by a number of maritime vessels. A boat begins to act anomalously due to an unknown reason (e.g. terrorism, adverse weather, mutiny, etc\'85), veering off the known trade route. All potential communication has been cut off with the vessel and the vessel is no longer transmitting information (e.g. AIS, transponders, etc\'85) - being able to act independently from the vessel to potentially analyse where the vessel could go through the usage of satellite products would give maritime organisations a huge advantage in predicting where the vessel could be, improving the probability of finding the vessel - saving money and potentially lives in the process. \par
+\par
+In relation to the above scenario, you could also use satellite products or previous AIS communications to detect anomalies in a vessel\'b4s trajectory before a situation involving search and rescue even occurs.\par
+\par
+Similarly, for the military, you may want to know where land-based targets are going based on satellite products. As an example, we have an external AI model which has identified targets within a satellite image, these targets appear to be on the move. The model feeds the prediction model the necessary variables in order to make a prediction. The new task would then be to determine where those targets will potentially go within certain limits, such as time and distance, which will impose limitations to model accuracy the greater those parameters are (i.e. it will be easier to predict where a vehicle will be in 5 seconds compared to 5 hours or days). Determining where these vehicles will go would give a military command ample time to prepare in accordance with the new vehicle trajectory predictions.\par
+\par
+Potentially going outside of the scope of this project, some human factors could also play a role in the trajectory or route a vehicle takes [9]. For land based vehicles with a single controller (i.e. a driver) the human factor plays a larger role in decisions compared to a maritime vessel which has more structural hierarchy, follows known routes and can require multiple \ldblquote seamen\rdblquote  to control the vessel. There already exists research which covers both short and long term trajectory predictions for humans using both model and model-free based approaches [10].\par
+\par
+To summarise, in order to predict the kinematic state of any vehicle, we require knowledge of certain data parameters associated with the vehicle before designing, developing and evaluating a prediction model. This will be covered comprehensively in section two of this thesis.\par
+1.2. Project Aims\par
+As mentioned in the overview, the aim of the thesis is to attempt to answer the original question: \ldblquote Can we predict a vehicle\'b4s movement using satellite products?\rdblquote . In order to come to a conclusion, partial conclusion or even a failure to conclude that question, we must set, research and attempt a set of objectives or goals that this thesis must accomplish. \par
+\par
+Firstly, the aim of this thesis is to make a model using statistical or machine learning methods for predicting the kinematic state of a vehicle using either collected or pre-existing data to a reasonable accuracy. The prime objectives are as follows:\par
+\par
+Objective 1. Complete a comprehensive literature review of vehicle state prediction, their usage, the current state of state prediction research and its usage in accordance with satellite products. Make a conclusion about the current state of research, how current and past research can aid in this project as well as how this thesis could potentially aid in current research.\par
+Objective 2: Collect appropriate data, either original or pre-existing, to support the development of the model.\par
+Objective 3: Design and implement a model based on collected data parameters which can predict a vehicle\'b4s kinematic state using either statistical methods or machine learning. The model must have reasonable performance metrics when compared to other similar models.\par
+Objective 4: Test and evaluate the aforementioned model\rquote s performance metrics such as accuracy, precision, etc\'85 This could be done by comparing the metrics of other models to your own.\par
+Objective 5: Conclude the thesis by presenting findings, detail final model performance metrics and make recommendations for future work.\par
+1.3. Project Plan\par
+The project timeline has been broken down into a milestone combined with a deadline, this plan can be seen as follows with an accompanying timeline:\par
+\par
+Milestone\par
+Deadline\par
+Finish Literature Review\par
+30th June 2023\par
+Finish Introduction Section\par
+7th July 2023\par
+Find Satellite Data Products\par
+17th July 2023\par
+Create Initial Models and Data with Preprocessing\par
+30th July 2023\par
+Interim Review of Document\par
+30th July 2023\par
+Finish Model Evaluation and Complete First Draft\par
+14th August 2023\par
+FINAL REPORT DEADLINE\par
+28th AUGUST 2023\par
+\par
+\par
+Figure 1.0 - Project Milestone Table\par
+\par
+\par
+Graph 1.1 - Project Plan Diagram (GANTT Format)\par
+2. Literature Review\par
+2.0. Methodology and Rationale \par
+As an introduction to the literature review, it would be worth going over the rationale of the literature review (i.e. why we would perform this literature review in the first place), what kind of literature will be reviewed and what conclusions and advice we can take from the literature review.\par
+\par
+We begin by asking ourselves why we would perform a literature review in the first place? We can also ask how we could start, perform and finish the literature review as well as how we could use this literature review to aid in thesis work [1]. \par
+\par
+The literature review typically serves as a critical foundation for a paper, evaluating and examining current and past research, allowing us to identify gaps in research, inform the predictive model for this thesis and imply the current state of research, in this case, for vehicle state predictors.\par
+\par
+We start by producing some kind of criteria for the literature review, listed below, we look at what kind of papers we want to review, in this case, we are reviewing papers which are relevant to vehicle state predictors and similar papers to the title of this thesis. \par
+\par
+The papers in question must be of a high quality, the judgement of quality shall be done by reviewing the following:\par
+The paper must be relevant to the content of this thesis (i.e. cover vehicle state predictors and related works/studies).\par
+The paper must have been performed by a respected body or institution (e.g. a university, industrial review, IEEE, etc\'85), which could be an indicator of quality due to credibility, the expertise of researchers and a relevance to the academic community, to name a few reasons.\par
+The paper could be highly cited, the more highly it is cited could indicate higher quality due to other authors citing indicating the paper produces relevant content.\par
+The paper could have produced a product, led to more research or produced some other kind of positive output or had a positive outcome (e.g. a prediction model).\par
+\par
+We continue by reviewing the papers found when we set the criteria for the literature review, we examine the content of the literature, this could be by examining methodology, producing some constructive criticism of the literature and potentially offering improvements to the literature in question.\par
+\par
+We would end by making an evaluation of the current state of research for vehicle state predictors and the study topic of this thesis in general, if there are any gaps in research and the research progress of vehicle state prediction over the past few decades. Remarks and advice for the approach and methodology of the \ldblquote real\rdblquote  work of this thesis will be determined, leading to an improvement or providing guidance for the core work of this thesis, building a model for predicting the state of vehicles using satellite products. \par
+\par
+The pieces of literature will not be ranked, rather utilised based on individual relevance and relevant paper quality.\par
+2.1. Similar Papers & Studies - A Literature Review\par
+The first individual paper I would like to comprehensively examine is what I believe is the most relevant to the topic of this thesis. A master's thesis conducted by a student of the Naval Postgraduate School of the U.S. Armed Forces on the prediction of maritime vessels using a mixture of statistical and machine learning methods for predicting routes [5]. \par
+\par
+The results of this study found that it is possible to develop tools to predict vessel trajectories to the expected levels of a user using a random forest model to a 94% accuracy for future position prediction. A neural network was also used but achieved an accuracy of only 81%. The study also used a heatmap for the prediction region which is noted could be used in search and rescue operations, see Figure 2.0. \par
+\par
+Accuracies also changed depending on how far a prediction was made - with predictions further into the future leading to less accurate readings. \par
+\par
+It is also worth noting though that AIS was not originally designed to track ships. However, the information it provides certainly can provide enough information in order to conduct this task.\par
+\par
+\par
+Figure 2.0 - An Extract From Young\rquote s Paper Showing a Vessel\rquote s Predicted Route to Two Hours using a Random Forest Model\par
+\par
+It's worth noting that using satellite products for maritime vehicle state prediction could be considered the most forefront application of VSPs for vehicles, as it's harder for cars/bikes/military vehicles and even harder still (if not improbable) for airborne vehicles to be predicted using satellite image products. It could also be used in the monitoring of \ldblquote dark ships\rdblquote , that is, ships that turn off their transponders and perform abnormal behaviours, you could use a combination of satellite products to detect, track and predict ship trajectories. [11] \par
+\par
+Looking at trajectory prediction from another perspective, in another paper, Zhang, et al, 2017 [16], looked in their paper at using various machine learning methods for trajectory prediction in relation to computer vision. Zhang, et al, used an initial feature extractor to extract information from image and video data using a simple CNN (convolutional neural network) before moving onto a trajectory predictor model utilising LSTM (long short term memory). \par
+\par
+The model was then used on both a real world vehicle dataset and a visual tracking benchmark used in the evaluation of prediction ability and on \ldblquote tracking methods for tracking videos without pretrained trajectories\rdblquote  with the purpose of experimentation. Their tracking method is then compared against other tracking methods in the experiment: Struck, ASLA, CXT, CSK, SCM and DLT. Note that some of these methods are \ldblquote classical\rdblquote  while others, such as DLT, are machine learning oriented. \par
+\par
+When compared against other models in the experiment, success rate was noted as being 0.7436, which was comparable to SCM. However, the precision rate for their approach was 88.94%, outperforming the closest model (ASLA) by 3.9%. After the initial experiment, the average success rate on both datasets was analysed. The vehicle dataset yielded a result of 94%, which was the best result, more than ASLA and CSK by a margin of 3%. The benchmark dataset yielded a success rate of 68%, again, this was the best result, beating Struck by 2%.\par
+\par
+However, Zhang, et al\'b4s model was implemented using unoptimised code in MATLAB, further improvements to the model could have been made had the code been optimised, providing better results for the model.\par
+\par
+The second paper I would like to examine is the IEEE journal on\par
+\par
+(IN LITERATURE REVIEW COVER MORE ON TOPICS RELEVANT TO PAPER, WHY TOPICS WOULD BE NEEDED, ESSENTIALLY EXPLAIN THE TOPICS ON YOUR PAPER AND WHY THEY ARE NEEDED)\par
+\par
+COVER THESE PAPERS:\par
+{{\field{\*\fldinst{HYPERLINK https://www.sciencedirect.com/science/article/pii/S2352340922007077?via%3Dihub }}{\fldrslt{https://www.sciencedirect.com/science/article/pii/S2352340922007077?via%3Dihub\ul0\cf0}}}}\f0\fs22  - Maritime route and vessel tracklet dataset for vessel-to-route association\par
+{{\field{\*\fldinst{HYPERLINK https://www.sciencedirect.com/science/article/pii/S2352340919304950?via%3Dihub }}{\fldrslt{https://www.sciencedirect.com/science/article/pii/S2352340919304950?via%3Dihub\ul0\cf0}}}}\f0\fs22  - Heterogeneous integrated dataset for Maritime Intelligence, surveillance, and reconnaissance\par
+{{\field{\*\fldinst{HYPERLINK https://ieeexplore.ieee.org/abstract/document/4663951 }}{\fldrslt{https://ieeexplore.ieee.org/abstract/document/4663951\ul0\cf0}}}}\f0\fs22  - Vehicle Full-State Estimation and Prediction System Using State Observers.\par
+\par
+FOR EXAMPLE, OVERVIEWS OF MODELS USED AND EXPLANATIONS SHOULD BE DISCUSSED HERE, DATA EXPLANATIONS?\par
+2.3. Evaluation of Methodology & The State of Research\par
+Young, 2017, concluded using random forest classifiers worked for his model over the more advanced neural network classifier. Young\'b4s random forest model yielded various accuracy results for a two hour prediction of a route, with average accuracy being at 94.24%, while the neural network under the same conditions produced an average accuracy of 81.19%,increasing the initial amount of epochs from the neural network from 1000 to 10000 did not significantly increase Young\'b4s accuracy findings. \par
+\par
+The findings of this paper could indicate that using traditional methods, such as random forest, could be preferable to machine learning methods, such as a traditional neural network. \par
+\par
+Furthermore, Young also notes longer processing times for the neural network over the random forest model - however, it should be noted that Young ran his model from a regular macbook laptop and not a workstation or supercomputer. Furthermore, the findings from Young\'b4s study could aid in efficient search and rescue operations at sea and in logistics optimisation.\par
+\par
+Zhang, et al, 2017, while their paper focused on computer vision for trajectory prediction, indicated from their findings that their method of using machine learning methods which utilised CNN and LSTM for performing predictions was also preferable over other methods. \par
+\par
+The success rate of Zhang, et al\'b4s model indicates that methods utilising a CNN/LSTM based approach could also be viable, if not preferred. However, this would only be relevant if the later model started to use image data, otherwise, it would not really be suited to purely numerical data such as AIS.\par
+3. Data Collection and Preprocessing\par
+3.0. Data Collection\par
+(First Draft) In terms of data we would like to collect, ideally, we would take data from multiple sensors on the vehicle. This could be from: GPS, IMU, AIS or camera data; we could also take vehicle data from non-sensors such as satellite images, weather data and traffic data. It is also worth noting that we are predicting much more than just \ldblquote where the vehicle will be\rdblquote , for example, we may have to predict vehicle position, velocity, acceleration and orientation to name a few data parameters we might want to take.\par
+\par
+In terms of data collection, the argument could be made either against producing original datasets or using existing datasets. Collecting the data ourselves will take more time/effort but will allow us to collect the exact data that we want to collect. Using existing datasets implies less effort taken to collect data with other organisations or individuals potentially having the means to gather and collect more data, there is a risk that data could be irrelevant though.\par
+\par
+Regardless of how we collect the data, it is necessary to collect the following data parameters:\par
+Data Name\par
+Data Description\par
+Longitude\par
+Longitudinal navigational information of the receiver/ego-vehicle.\par
+Latitude\par
+Latitudinal navigational information of the receiver/ego-vehicle.\par
+Speed\par
+The speed in which the receiver/ego-vehicle is moving in relation to when the data reading was taken. Measured in kilometres per hour. \par
+Time\par
+The calculated UTC time of the data reading with offset.\par
+Orientation\par
+The direction of the receiver/ego-vehicle.\par
+\par
+\par
+Some additional data parameters could be taken such as journey start/end times or some additional parameters such as vehicle weight or max speed. However, these parameters may not always be available and/or may serve to over-complicate. Therefore, it is necessary for the above data parameters to be taken.\par
+\par
+For initial analysis I gathered data using a U-Blox GNSS receiver Using data from four different navigational satellite constellations: GPS, Galileo, BEIDOU and GLONASS which we will abbreviate as GGBG. [INSERT THE SPECS OF THE RECEIVER AS WELL AS HOW FREQUENTLY IT COLLECTS DATA HERE]. GGBG distributes NMEA-0183 formatted messages containing our required data parameters, for initial data analysis, we use NMEA-0183 GGA & GLL formatted messages since this contains the appropriate data parameters [12]. This data will be used to analyse constellation accuracy and precision in order to determine which satellite navigational constellation will be used in the final model. \par
+\par
+For the final model, I have taken two approaches: a maritime vessel approach where we will predict the trajectory of maritime vessels, and a land-based vehicle approach where we predict the trajectory or route of a vehicle. \par
+\par
+In terms of data collection, for maritime route data, AIS data collected automatically from vessels operating in The Celtic Sea, North Atlantic Ocean, The English Channel and France\rquote s Bay of Biscay were used. The data was taken from various European organisations which includes the French Naval Academy, European Commision (Fisheries & Maritime Affairs) as well as other sources [14] [15]. It is worth noting that most AIS\rquote  will use \ldblquote standard VHF transceivers\rdblquote  which enables the usage of GPS for precise positioning [13].\par
+\par
+To enhance the performance metrics of the model we will have to initially make some assumptions about the data:\par
+The data will perform fusion between satellite and ego-vehicle based data parameters, i.e. we will not purely be using satellite data, but also data from IMU, RADAR, LIDAR, camera, drone, etc\'85\par
+It should be assumed that satellite products will be used to enhance the performance of the final model (e.g. through assessing road conditions or analysing weather).\par
+3.1. Preliminary Analysis of Collected Data\par
+The preliminary analysis of the collected UBlox GNSS receiver data will be used to ascertain which navigation constellation our final model should use. GNSS related parameters will be accessed and compared - particularly constellation accuracy and precision in relation to our readings. Data will also be visualised using Python, GeoJson data files of the University of Bradford campus and our data parameters.\par
+\par
+The receiver was first set-up to retrieve messages automatically using accompanying software included with the UBlox GNSS receiver, UCenter2. Pre-existing functions within the software were used to perform configurations, take readings and export the data as well as to specify data parameters (i.e. selected GNSS constellation, data columns, NAV enabling). The data was configured to be exported as a .csv file.\par
+\par
+Data was gathered in 15 minute periods for each GNSS constellation using both internal and external GNSS receivers, making total collection time just over 2 hours. Hours reserved for data analysis were between 0800-1200 and 1300-1800. Data was taken during both these longer time periods to account for errors, setup time and redundancy. Weather conditions were harsher than normal during readings, which could have some effect on final metrics.\par
+\par
+The received NMEA-0183 messages were first analysed in their raw format to determine the type of data used within the messages - the below figure shows an extract of the raw NMEA-0183 message data. \par
+\par
+\par
+Figure 3.0 - Ucenter2 Raw NMEA Data (as CSV).\par
+\par
+Received data is highly numerical in nature, which aids in data pre-processing. \par
+\par
+As mentioned above, we use Python to analyse this data, with Python we also utilise the following libraries:\par
+\par
+Library Name\par
+Library Description\par
+Pandas\par
+Used for data analysis and manipulation.\par
+NumPy\par
+Used for mathematical functions on arrays.\par
+Seaborn\par
+Used for data visualisation.\par
+GeoPandas\par
+Used for geospatial data functions.\par
+Plotly Express\par
+Used for further data visualisation.\par
+MatPlotLib\par
+Used for mathematical plotting.\par
+\par
+\par
+After performing data exporting, we begin by importing the above libraries as well as the exported GGBG GNSS data we collected. Note that for the purposes of illustration, I will include code extracts below.\par
+\par
+\par
+Figure 3.1 - Importing of GNSS Constellation Galileo Data, Readability Dataset Modifications and Dataset Extract.\par
+\par
+After the initial imports for each GNSS constellation and receiver data, we can perform feature extraction for the datasets, in this case we focus primarily on the longitude and latitude data, with the addition of height and precision/DoP features. Longitude and latitude data is also stored as an integer datatype, this must be changed to a float for usage with the GeoPandas dataset as well as for later data analysis purposes.\par
+\par
+\par
+Figure 3.2 - Feature Extracted Galileo Dataset.\par
+\par
+After performing necessary feature extraction, in order to use the longitudinal and latitudinal data for later analysis, further preprocessing is necessary, we are required to shape the data for later usage and analysis.\par
+\par
+Figure 3.3 - Data Shaping for Longitude and Latitude Galileo Data.\par
+\par
+Note that the processing of import, feature extraction, data shaping, etc\'85 was performed on each dataset for each GGBG GNSS constellation dataset - Figure 3.4 below shows a code extract of this pre-processing methodology for the GPS data, the same steps were followed for BeiDou and GLONASS as well.\par
+\par
+\par
+Figure 3.3 - GPS Data Pre-Processing Extract\par
+\par
+After performing these initial steps, we can begin to analyse the data. Initially, we may want to understand how spread out the data is. Therefore, we analyse the standard deviation as well as complete a scatter graph of the latitude and longitude data (Figure 3.4, Table 3.5).\par
+\par
+\par
+Figure 3.4 - Longitude/Latitude Scatter Graph\par
+\par
+Table 3.0 - Longitude/Latitude Standard Deviation by GNSS Constellation\par
+\par
+\par
+\par
+\par
+GPS\par
+Galileo\par
+BEIDOU\par
+GLONASS\par
+Longitude \f1\lang1032\'f3\par
+0.000054\par
+0.000454\par
+0.000152\par
+0.000075\par
+Latitude \'f3\par
+0.000036\par
+0.000143\par
+0.000087\par
+0.000047\par
+\par
+\par
+The standard deviation was calculated using a mixture of the Pandas and Numpy library using the standard deviation formula:\par
+\par
+\par
+(SECOND ONE IS USED IN NUMPY ACCORDING TO {{\field{\*\fldinst{HYPERLINK https://www.sharpsightlabs.com/blog/numpy-standard-deviation/ }}{\fldrslt{https://www.sharpsightlabs.com/blog/numpy-standard-deviation/\ul0\cf0}}}}\f1\fs22  , FACT CHECK WITH VIKTOR)\par
+\par
+After this, we will perform further visualisation of the data, a few steps must be adhered to in order to achieve this:\par
+The data must be pre-processed to be in the correct format.\par
+The data must have a geometric medium to be projected onto.\par
+A medium in which we can project our data points onto our geometric medium.\par
+\par
+To achieve the first of these goals, we use the GeoPandas library to change the current dataframe into one that can be projected onto a geometric medium, i.e. our map, using the GeoDataFrame data type.\par
+\par
+The geometric medium must also be appropriate; a GeoJSON file format of the University of Bradford\f0\lang1033\'b4s campus was used, taken from a GeoJSON file of the general West Yorkshire area. This can be used later on to make a geofence as well as giving us a medium in order to map our geometric data points.\par
+\par
+To conclude the last of these goals, we use the Plotly Express library in order to create a visual representation of the University of Bradford campus using the original GeoJSON file as well as mapping our original geometric data points (i.e. our longitude and latitude values) onto the University of Bradford GeoJSON file.\par
+\par
+The result is a traced map of individual points on our map, figure 3.5 below shows an extract of this using the data gathered from Galileo traced onto a map using Plotly Express.\par
+\par
+Figure 3.5 - Galileo Data Points Mapped Geographically using only Plotly Express\par
+\par
+Finally, using a combination of the above we can create a geofence to analyse if any points completely fall outside of the University of Bradford campus, this can be used to see if the device was moved outside the area we \ldblquote fenced off\rdblquote  or if a data point taken was extremely inaccurate. The geofence can also then be applied later on.\par
+\par
+\par
+Figure 3.6 - The Mapped Geofence of the University of Bradford Campus\par
+\par
+We can also analyse whether or not any points have fallen outside of our chosen geofence by analysing the dataframe itself. \par
+\par
+Figure 3.7 - Analysis of the Dataframe Using Jupyter Notebook - All Values Fall within our Geofence.\par
+\par
+Finally, we can employ a visualisation method where we map our geofenced points based on colour. We can map geofenced points in blue and non-geofenced points in red.\par
+\par
+Figure 3.8 - Colour Coded Geofenced Points using GPS as a Reference\par
+\par
+To finalise, we can make our final observations and conclude the initial analysis of the preliminary data, with some initial conclusions. Initially, we may want to analyse precision and accuracy using the following method of analysing the standard deviation we took before, as well as using the following visual method:\par
+\par
+\par
+Figure 3.9 - Accuracy and Precision, A Visual Perspective\par
+\par
+Using a visual and numerical method of evaluating the accuracy and precision of each constellation we can make some conclusions of both of these metrics for each constellation. Below we use the methods mentioned earlier to map and geofence each point for each constellation.\par
+\par
+\par
+Figure 3.10 - Each Constellation\'b4s Data Points Geometrically Mapped and Geofenced\par
+\par
+Using both visual and numerical perspectives taken from Table 3.0 and Figure 3.10 respectively, we can make the following comments:\par
+GPS from a visual and numerical perspective has the highest precision and accuracy.\par
+GLONASS performed well in terms of precision (Table 3.0) but did not perform well in terms of accuracy compared to GPS (Figure 3.10).\par
+BeiDou seemed to perform well numerically, however, from a visual perspective, the accuracy AND precision were both low.\par
+Galileo performed the worst numerically and visually - this could be for a number of factors discussed below.\par
+\par
+In terms of why we would actually need to take these readings, consider using a GPS device such as your phone, if the readings are inaccurate and imprecise (e.g. the device puts you 3-4 streets away from where you actually are) this can lead to situations where a person could get lost, incorrectly position themselves or just generally provide poor quality positioning information.\par
+\par
+Thus, we can confirm through numerical-visual methods that GPS is the most accurate and precise for data readings, in this case. However a number of points could be made which could have affected the data readings:\par
+The first data entry points were taken from Galileo, which could have impacted accuracy and precision due to human errors in configuration.\par
+Weather factors could have impacted overall readings, due to adverse weather during data takings.\par
+Another mention of AIS, an AIS transceiver will use GPS technology (e.g. a GPS receiver), above we took readings which indicated that GPS had the highest overall accuracy and precision when compared to other similar GNSS constellations. Therefore, we can conclude that it would be reasonable to use AIS which utilises GPS in our final model over other GNSS constellations.\par
+\par
+Finally, in terms of future improvements, in terms of what we have covered in this section, a number of improvements could be considered:\par
+Usage of a smaller geofence limited to only the research labs could be considered more appropriate, due to our geofence of the entire campus already being quite large.\par
+Larger survey size for our data taken over longer periods of time, applying it to the overall theme of our thesis (vehicles) and taking more data overall. This could however negatively affect processing times for future models or analysis while positively impacting accuracy and precision readings.\par
+Prediction of future points - this would directly relate to the theme of this thesis, in that we would be predicting where a point would be to a certain degree of accuracy. \par
+\par
+3.2. Vessel/Maritime Data Analysis\par
+3.2.0. Data Background\par
+The data contains AIS information from vessels operating in seas around Brest, France and covers the Celtic Sea, North Atlantic Ocean, English Channel and the French Bay of Biscay. \par
+\par
+The data file itself is called \ldblquote Maritime Routes and Tracklets\rdblquote  and contains five comma separated values (.csv) files, containing different pieces of data:\par
+\par
+Table 3.1 - Data File Description\par
+\par
+\par
+File Name\par
+File Description\par
+all_points.csv\par
+This data represents maritime vessel routes as point clusters. \par
+nomen.csv\par
+Data representing route nomenclature.\par
+poi_csv\par
+Data representing ports of interest.\par
+prototypes.csv\par
+A prototype form of maritime route information.\par
+tracklets.csv\par
+Data representing maritime tracklets for vessels.\par
+\par
+\par
+The two files we will focus on now are \ldblquote all_points.csv\rdblquote  and \ldblquote tracklets.csv\rdblquote  due to the fact that these data files contain the data variables we need in order to make a prediction. \par
+\par
+The first file, \ldblquote all_points.csv\rdblquote , as mentioned table 3.1 contains vessel routes as point clusters, this type of data is useful for analysing vessel behaviour, identifying a port of call and studying vehicle trajectory patterns at a higher, overall level. However, overall using point cluster data to make predictions might prove more challenging, due to a lack of continuous trajectory data.\par
+\par
+However, the second file, \ldblquote tracklets.csv\rdblquote  will contain data which will have continuous trajectory data which could provide a better representation of the kinematic state of the vessel, this is because the maritime tracklets data contains more data on the sequence of positions and timestamps related to a vessel, making it easier to perform time series forecasts. This could imply that it would be easier to make a prediction model for vessel kinematic paths using this data.\par
+\par
+Therefore, since the goal is to predict the kinematic state of a vehicle (vessel, in this case), it would be preferable to use the \ldblquote tracklets.csv\rdblquote  file over \ldblquote all_points.csv\rdblquote . However, it is worth noting though that for predictions of overall behaviour of vessels or an overall pattern of vessel behaviour, \ldblquote all_points.csv\rdblquote  may be preferred.\par
+3.2.1. Initial Data Analysis and Preprocessing\par
+Include\par
+Data preprocessing for the tracklets csv file.\par
+Data representation (i.e. show the dataset within Jupyter Notebook).\par
+Explain any preprocessing methods, why they are needed any why you might not need any more preprocessing.\par
+\par
+We begin the initial preparation of our model by selecting the tools used to develop our model as well as preparing our data. \par
+\par
+We will use Python to develop an implementation of our model along with the libraries we used in the preliminary data analysis of GNSS constellations. The initial data in the file was set with a non-standard delimiter, making it not readable with a base Pandas read_csv() function; the delimiter must be set before being readable.\par
+\par
+\par
+\par
+Figure 3.11 - Initial Data Before and After Setting a Delimiter\par
+\par
+\par
+We are now able to read the data, here we can notice a few things wrong with the data that require preprocessing: \par
+The data is storing our time (\ldblquote ts(n)\rdblquote  - short for timestamp, where n is the number associated with the timestamp) in UNIX timestamps, which are not inherently human-readable.\par
+The time series tracklet data should be chronological.\par
+Any missing or null values should be found and removed, this can also be done to check for gaps in timestamps.\par
+Other feature engineering, such as finding the time intervals between vessel positions or the distance travelled between positions.\par
+\par
+Here is also some information about the data, for future reference:\par
+\ldblquote idtracklet\rdblquote : The unique identifier for each tracklet in the file.\par
+\ldblquote idn\rdblquote : Unique identifier for n vessels within the tracklet, in this case, n=5.\par
+\ldblquote mmsin\rdblquote : Maritime Mobile Service Identity, this is an AIS unique identifier for vessels.\par
+\ldblquote speedn\rdblquote : Vessel speed in knots.\par
+\ldblquote coursen\rdblquote : Vessel direction of travel in degrees, typically known as course over ground.\par
+\ldblquote headingn\rdblquote : The headings of the vessel, typically, this is the direction of the vessel's bow in degrees.\par
+\ldblquote lonn\rdblquote : Vessel longitude, one of our primary variables.\par
+\ldblquote latn\rdblquote : Vessel latitude, another one of our primary variables. \par
+\ldblquote tsn\rdblquote : Timestamp in terms of the associated data point.\par
+\ldblquote route\rdblquote : Information about the route, has an accompanying file.\par
+\par
+Given our discussion regarding required variables from earlier, our likely vehicle state predictor model is likely to utilise:\par
+speedn\par
+coursen\par
+headingn\par
+lonn\par
+latn\par
+\par
+A\par
+\par
+4. Vehicle State Predictors \par
+4.0. The Usage of Vehicle State Predictors for Prediction Purposes\par
+We are required to understand what exactly it is we are trying to predict, for example, for our AIS data we may want to predict the port that a vessel may go to, we may want to predict the route that a vessel might take, or we may want to predict a longitude and latitude point for where a vessel may go from a particular point on it\'b4s route. \par
+\par
+To begin, to keep with the theme of this thesis, we will begin by predicting where a vessel may be from a certain point in its route, essentially, we will undertake a time-series forecast for the kinematic state of the vessel. \par
+\par
+In terms of the type of model we would like to use, we should try the deep learning approach over traditional statistical methods as they can offer more depth and performance metrics [8]. Before making this claim though, we will also test statistical methods below and compare the results against deep learning methods. The next section will cover the specific methodologies that will be used in the model.\par
+\par
+It is also worth noting that traditional methods may also outperform deep learning and machine learning based methods, as seen in the examples provided in our earlier literature review. Therefore, traditional methods will also be included in this prediction model, along with machine learning approaches. \par
+4.1. Methodology & Selection of Prediction Models\par
+Using our initial processed input data above, we can assume a timeline for our predefined model (i.e. model flow design) which could be visualised as something like this:\par
+\par
+Figure 4.0 - Simplified Model Flow Diagram\par
+\par
+For this model, we will initially use two traditional models: a linear regression and a random forest model. We will also use a machine learning based model: a traditional neural network. The overall aim of these models is to take our initial input variables to then produce a longitude/latitude point in space as well as a point in time that the vehicle might be in (essentially an ETA).\par
+\par
+The linear regression model should take our features, such as longitude and latitude, and our targets, which we will define within the implementation. Normally, an implementation of linear regression will work something like this [17]:\par
+\par
+\par
+\par
+Where:\par
+\ldblquote y\rdblquote  would be the target variable, sometimes referred to as the dependent.\par
+\ldblquote b0\rdblquote  is the intercept.\par
+\ldblquote b1 \'85 bn\rdblquote  are feature coefficients.\par
+\ldblquote x1 \'85 xn\rdblquote  are independent features.\par
+\par
+In the actual implementation, we use the Python library \ldblquote sklearn\rdblquote  in order to implement this model in the form of code. Sklearn will adjust the feature coefficients by utilising OLS (Ordinary Least Squares) which will find coefficients that, as the name suggests, minimises a squared residual. The model will then be trained on our data, which will give rise to a prediction from the trained residuals and the above linear equation.\par
+\par
+\par
+Figure 4.0 - Pseudocode For Linear Regression Model Creation and Prediction\par
+\par
+Random forest again will be an sklearn implementation. Random forests typically involve multiple decision trees, combining them to make a final prediction. Typically, a random forest will utilise bootstrapping, where we have a dataset N, where we select N samples to create subsets to train an entire decision tree. To reduce overfitting, randomness is introduced to the subsets, introducing diversity as well [18].\par
+\par
+It is also worth noting that random forest models can be implemented as a classifier or as a regression model, it is more appropriate for our purposes to utilise a regression model though. \par
+\par
+Typically a random forest is composed of M \ldblquote trees\rdblquote : T1, T2\'85TM. Where each tree \ldblquote TM\ldblquote  takes a subset from the bootstrap \ldblquote Si\rdblquote  of size N from some training data. A random subset \ldblquote F\rdblquote  for features are considering for the split to reduce overfitting and increasing diversity. Then the tree is constructed using \ldblquote Ti\rdblquote , \ldblquote Si\rdblquote  and \ldblquote Fi\rdblquote  to create recursive nodes.\par
+\par
+For calculating a prediction using a random forest model, a combination of predictions taken from individual trees are used, we can utilise the following formula typically used in random trees to calculate this:\par
+\par
+\par
+\par
+Note that this is typically used in regression models, for classification models a modified but similar formula is used. \par
+\par
+Moving onto the machine learning side, a traditional neural network, sometimes referred to as a MLP (multi-layer perceptron), consisting of an input layer: \ldblquote x1, x2 \'85 xn\rdblquote , hidden layer(s): \ldblquote h1, h2 \'85 hn\rdblquote  (\ldblquote an\rdblquote  in the below figure, in that case), and an output layer \ldblquote y1, y2, yn\rdblquote . Layers will contain \ldblquote neurons\rdblquote  which essentially conduct computations and pass information or weightings onto the next layer [19].\par
+\par
+\par
+Figure 4.1 - A Traditional Neural Network Utilising One Hidden Layer [19]\par
+\par
+It is worth noting that an activation function \ldblquote f(z)\rdblquote  is used in the hidden and output layers, the computation of the neural network begins by feeding the input layer, computations within the hidden and output layer can be typically be calculated as the following:\par
+\par
+For the hidden layer:\par
+\par
+\par
+And again for the output layer:\par
+\par
+\par
+Where:\par
+\ldblquote w_ij x_j\rdblquote  would be the weights (information) which are connected through neurons \ldblquote i\rdblquote  and \ldblquote j\rdblquote  from the previous layer: \ldblquote x\rdblquote  or \ldblquote h\rdblquote .\par
+\ldblquote b_i\rdblquote  would be the bias.\par
+\ldblquote h\rdblquote  or \ldblquote y\rdblquote  in this case would be the output of the activation function.\par
+\par
+Also note that the above are both considered activation functions and are considered as forward propagation processes, in which, input data is put through the neural network in order to calculate the predictions we want.\par
+\par
+Commonly with neural networks a loss function would be used to measure the difference between predicted outputs from the neural network and actual \ldblquote true\rdblquote  values. In the implementation, we would use MSE (mean square error) as our loss function.\par
+\par
+Additionally, backpropagation and gradient descent can also be calculated. Backpropagation would be used to optimise our loss function by updating weights and biases, calculating the gradient of the loss function (backwards propagation), this can be done through the following formula:\par
+\par
+\par
+\par
+\par
+Where:\par
+\ldblquote z_i\rdblquote  would be the weighted input of neuron \ldblquote i\rdblquote .\par
+\ldblquote y_i\rdblquote  would be the weighted output of neuron \ldblquote i\rdblquote .\par
+\ldblquote w_ij\rdblquote  would be the weight from connecting neuron \ldblquote i\rdblquote  to connecting neuron \ldblquote j\rdblquote .\par
+\par
+Note that \ldblquote vartheta loss\rdblquote  is in relation to a partial derivative of the loss function, for example \ldblquote Vartheta Loss / Vartheta w_ij\rdblquote  would represent the partial derivative of the loss function in respect to the weight \ldblquote w\rdblquote  to the connecting neurons \ldblquote i\rdblquote  and \ldblquote j\rdblquote .\par
+\par
+The above can be considered how much a loss function changes in relation to variables such as neuron output and input.\par
+\par
+Similarly, the gradient descent can be calculated using the following formula:\par
+\par
+\par
+Where:\par
+Alpha is the learning rate.\par
+\par
+Note that this formula indicates the direction the calculated gradients (from the updated weights and biases) move for a reduction of loss.\par
+\par
+Following an iterative process of forward and backward propagation as well as gradient descent can be considered model optimisation, which will increase a neural network\'b4s ability to make more accurate and higher quality predictions.\par
+\par
+Finally, please note that Sklearn may change aspects of the above formulas due to updates to the library, documentation, etc\'85 \par
+4.2. Implementing Prediction Models\par
+Include:\par
+Code extracts.\par
+Data visualisation of true and predicted points on a map.\par
+\par
+First, our linear regression model:\par
+\par
+Secondly, our random forest model:\par
+\par
+Finally, our neural network model:\par
+\par
+4.3. Testing\par
+Include:\par
+Initial Machine Learning metrics.\par
+Type of testing used with maths and graphs.\par
+4.4. Evaluation and Findings\par
+Include:\par
+Final performance metrics for each model.\par
+Explain how these performance metrics relate to the quality of the model.\par
+\'bfConclude the highest quality model?\par
+\par
+Evaluation metrics for each model:\par
+\par
+Table 4.0 - Final Prediction Model Evaluation Metrics\par
+\par
+\par
+Metric Name\par
+Linear Regression\par
+Random Forest\par
+Traditional Neural Network\par
+Accuracy \par
+\par
+\par
+\par
+\par
+\par
+\par
+Precision\par
+\par
+\par
+\par
+\par
+\par
+\par
+F1 Score\par
+\par
+\par
+\par
+\par
+\par
+\par
+TPR\par
+\par
+\par
+\par
+\par
+\par
+\par
+FPR\par
+\par
+\par
+\par
+\par
+\par
+\par
+TNR\par
+\par
+\par
+\par
+\par
+\par
+\par
+TPR\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+5. Conclusion \par
+5.0. Summarisation of Findings and Concluding Comments\par
+To \par
+5.1. Future Recommendations\par
+In order to expand the model further, we could extend the scope of this project to cover human trajectories. Human trajectory prediction already exists, with multiple models, studies and open source code freely available for usage [9].\par
+\par
+You could also implement more \ldblquote visual\rdblquote  methods of predicted vehicle states from optical, radar or SAR based products. This could include:\par
+A classification based system which detects a vehicle from an image. This classification model could also detect the type of vehicle (e.g. car, boat). This would serve as a precursor to a vehicle state prediction model.\par
+A prediction model predicting variables such as longitude, latitude, speed, potential destinations, etc\'85 \par
+Going even further into an image classifier, you could incorporate image enhancement algorithms, in this case, with satellite products, you may want to implement pan-sharpening [CITATION NEEDED]\par
+6. Bibliography\par
+[1] Margot, K.C. and Kettler, T. (2019). Teachers\rquote  perception of STEM integration and education: a systematic literature review. International Journal of STEM Education, [online] {{\field{\*\fldinst{HYPERLINK https://doi.org }}{\fldrslt{https://doi.org\ul0\cf0}}}}\f0\fs22  6(1). Available at: {{\field{\*\fldinst{HYPERLINK https://doi.org/10.1186/s40594-018-0151-2 }}{\fldrslt{https://doi.org/10.1186/s40594-018-0151-2\ul0\cf0}}}}\f0\fs22 . Last Accessed: 17/06/2023\par
+\par
+[2] Li, X., Guvenc, L. and Aksun-Guvenc, B. (2023). Vehicle State Estimation and Prediction. [online] {{\field{\*\fldinst{HYPERLINK https://arxiv.org/ }}{\fldrslt{https://arxiv.org/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://arxiv.org/abs/2304.11694 }}{\fldrslt{https://arxiv.org/abs/2304.11694\ul0\cf0}}}}\f0\fs22 . Last Accessed: 22/06/2023\par
+\par
+[3] Hsu, L.-Y. and Chen, T.-L. (2008). Vehicle Full-State Estimation and Prediction System Using State Observers. [online] ieeexplore.ieee.org. Available at: {{\field{\*\fldinst{HYPERLINK https://ieeexplore.ieee.org/abstract/document/4663951 }}{\fldrslt{https://ieeexplore.ieee.org/abstract/document/4663951\ul0\cf0}}}}\f0\fs22 . Last Accessed: 22/06/2023\par
+\par
+[4] Stuparu, D.-G., Ciobanu, R.-I. and Dobre, C. (2020). Vehicle Detection in Overhead Satellite Images Using a One-Stage Object Detection Model. [online] {{\field{\*\fldinst{HYPERLINK https://www.ncbi.nlm.nih.gov/ }}{\fldrslt{https://www.ncbi.nlm.nih.gov/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7696426/ }}{\fldrslt{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7696426/\ul0\cf0}}}}\f0\fs22  [Accessed 29 Jun. 2023].\par
+\par
+[5] Young, Brain L., (2017). PREDICTING VESSEL TRAJECTORIES FROM AIS DATA USING R. [online] {{\field{\*\fldinst{HYPERLINK https://apps.dtic.mil/ }}{\fldrslt{https://apps.dtic.mil/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://apps.dtic.mil/sti/pdfs/AD1046595.pdf }}{\fldrslt{https://apps.dtic.mil/sti/pdfs/AD1046595.pdf\ul0\cf0}}}}\f0\fs22  [Accessed 29 Jun. 2023].\par
+\par
+[6] Zhang, R., Guo, Y., Long, Y., Zhou, Y. and Jiang, C. (2022). Vehicle Motion State Prediction Method Integrating Point Cloud Time Series Multiview Features and Multitarget Interactive Information. [online] {{\field{\*\fldinst{HYPERLINK https://www.hindawi.com/ }}{\fldrslt{https://www.hindawi.com/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://www.hindawi.com/journals/jat/2022/4736623/ }}{\fldrslt{https://www.hindawi.com/journals/jat/2022/4736623/\ul0\cf0}}}}\f0\fs22  [Accessed 29 Jun. 2023].\par
+\par
+[7] Yang, T., Wang, X., Yao, B., Li, J., Zhang, Y., He, Z. and Duan, W. (2016). Small Moving Vehicle Detection in a Satellite Video of an Urban Area. [online] {{\field{\*\fldinst{HYPERLINK https://www.ncbi.nlm.nih.gov/ }}{\fldrslt{https://www.ncbi.nlm.nih.gov/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5038801/ }}{\fldrslt{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5038801/\ul0\cf0}}}}\f0\fs22  [Accessed 29 Jun. 2023].\par
+\par
+[8] Do, H. (2019). Are Deep Learning models always the best? [online] {{\field{\*\fldinst{HYPERLINK https://towardsdatascience.com/ }}{\fldrslt{https://towardsdatascience.com/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://towardsdatascience.com/the-almighty-deep-learning-or-is-it-270d09ea2f27 }}{\fldrslt{https://towardsdatascience.com/the-almighty-deep-learning-or-is-it-270d09ea2f27\ul0\cf0}}}}\f0\fs22  [Accessed 08 Jul. 2023].\par
+\par
+[9] Yue, J; Dinesh Manocha; Wang, H; Wang, H. (2023), Human Trajectory Prediction via Neural Social Physics. [online] {{\field{\*\fldinst{HYPERLINK https://arxiv.org/ }}{\fldrslt{https://arxiv.org/\ul0\cf0}}}}\f0\fs22  Available at: {{\field{\*\fldinst{HYPERLINK https://arxiv.org/pdf/2207.10435v2.pdf }}{\fldrslt{https://arxiv.org/pdf/2207.10435v2.pdf\ul0\cf0}}}}\f0\fs22  [Accessed 11 Jul. 2023].\par
+\par
+[10] Unknown (2023), Trajectory Prediction on ETH/UCY. [online] {{\field{\*\fldinst{HYPERLINK https://paperswithcode.com/ }}{\fldrslt{https://paperswithcode.com/\ul0\cf0}}}}\f0\fs22 . Available at: {{\field{\*\fldinst{HYPERLINK https://paperswithcode.com/sota/trajectory-prediction-on-ethucy }}{\fldrslt{https://paperswithcode.com/sota/trajectory-prediction-on-ethucy\ul0\cf0}}}}\f0\fs22  [Accessed 11 Jul. 2023].\par
+\par
+[11] Unknown (2021), \ldblquote Locating Dark Ships in the Era of Space-based RF Geolocation,\rdblquote  {{\field{\*\fldinst{HYPERLINK https://www.he360.com/ }}{\fldrslt{https://www.he360.com/\ul0\cf0}}}}\f0\fs22 , {{\field{\*\fldinst{HYPERLINK https://www.he360.com/resource/locating-dark-ships-in-the-era-of-space-based-rf-geolocation/ }}{\fldrslt{https://www.he360.com/resource/locating-dark-ships-in-the-era-of-space-based-rf-geolocation/\ul0\cf0}}}}\f0\fs22  (accessed Jul. 16, 2023).\par
+\par
+[12] U. Unknown, (Unknown) \ldblquote NMEA-0183 messages: Overview,\rdblquote  Recieverhelp, Unknown. {{\field{\*\fldinst{HYPERLINK https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_MessageOverview.html }}{\fldrslt{https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_MessageOverview.html\ul0\cf0}}}}\f0\fs22  (Last accessed Jul. 21 2023).\par
+\par
+[13] Wikipedia Contributors, \ldblquote Automatic identification system,\rdblquote  Wikipedia, Nov. 26, 2019. {{\field{\*\fldinst{HYPERLINK https://en.wikipedia.org/wiki/Automatic_Identification_System }}{\fldrslt{https://en.wikipedia.org/wiki/Automatic_Identification_System\ul0\cf0}}}}\f0\fs22  (accessed Jul. 23, 2023).\par
+\par
+[14] C. Ray, R. Dr\'e9o, E. Camossi, A.-L. Jousselme, and C. Iphar, \ldblquote Heterogeneous integrated dataset for Maritime Intelligence, surveillance, and reconnaissance,\rdblquote  Data in Brief, vol. 25, p. 104141, Aug. 2019, doi: {{\field{\*\fldinst{HYPERLINK https://doi.org/10.1016/j.dib.2019.104141 }}{\fldrslt{https://doi.org/10.1016/j.dib.2019.104141\ul0\cf0}}}}\f0\fs22 . (accessed Jul. 23, 2023).\par
+\par
+[15] C. Iphar, A.-L. Jousselme, and G. Pallotta, \ldblquote Maritime route and vessel tracklet dataset for vessel-to-route association,\rdblquote  Data in Brief, vol. 44, p. 108513, Oct. 2022, doi: {{\field{\*\fldinst{HYPERLINK https://doi.org/10.1016/j.dib.2022.108513 }}{\fldrslt{https://doi.org/10.1016/j.dib.2022.108513\ul0\cf0}}}}\f0\fs22 .  (accessed Jul. 23, 2023).\par
+\par
+[16] Wang L, Zhang L, Yi Z. \ldblquote Trajectory Predictor by Using Recurrent Neural Networks in Visual Tracking'' (2017). IEEE Explore. Retrieved from: {{\field{\*\fldinst{HYPERLINK https://ieeexplore.ieee.org/document/7935541 }}{\fldrslt{https://ieeexplore.ieee.org/document/7935541\ul0\cf0}}}}\f0\fs22  (accessed Aug. 05, 2023).\par
+\par
+[17] Unknown. \ldblquote sklearn.linear_model.LinearRegression\rdblquote . (2007) scikit-learn.org. Retreived from:  {{\field{\*\fldinst{HYPERLINK https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html }}{\fldrslt{https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html\ul0\cf0}}}}\f0\fs22  (accessed Aug 07. 2023).\par
+\par
+[18] Unknown. \ldblquote sklearn.ensemble.RandomForestRegressor\rdblquote . (2007) scikit-learn.org. Retreived from: {{\field{\*\fldinst{HYPERLINK https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#:~:text=A%20random%20forest%20regressor.,accuracy%20and%20control%20over%2Dfitting }}{\fldrslt{https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#:~:text=A%20random%20forest%20regressor.,accuracy%20and%20control%20over%2Dfitting\ul0\cf0}}}}\f0\fs22  (accessed Aug 07. 2023).\par
+\par
+[19] Unknown. \ldblquote 1.17. Neural network models (supervised)\rdblquote . (2014) scikit-learn.org. Retreived from: {{\field{\*\fldinst{HYPERLINK https://scikit-learn.org/stable/modules/neural_networks_supervised.html }}{\fldrslt{https://scikit-learn.org/stable/modules/neural_networks_supervised.html\ul0\cf0}}}}\f0\fs22   (accessed Aug 08. 2023).\lang10\par
+}
+ 
